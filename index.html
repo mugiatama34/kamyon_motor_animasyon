@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>12.8 L Kamyon Motoru 3D</title>
+<style>
+  :root {
+    --bg: #0c1117; --panel: rgba(16, 22, 30, .88); --line: rgba(255,255,255,.10); --text: #e7edf3; --muted: #93a1b0;
+    --accent: #ffb020; --accent2: #4aa8ff; --warn: #ff6a3d; --ok: #3ddc97; --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; color-scheme: dark; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  #title { position: fixed; left: 16px; top: 12px; max-width: min(520px, calc(100vw - 120px)); pointer-events: none; text-shadow: 0 1px 8px #000; }
+  #title h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: .2px; }
+  #title p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+  #menuBtn { position: fixed; left: 10px; top: 50px; z-index: 6; display: none; }
+  #left { position: fixed; left: 12px; top: 62px; bottom: 12px; width: 292px; padding: 10px 12px; overflow-y: auto; z-index: 5; scrollbar-width: thin; }
+  #left h2 { margin: 14px 0 6px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 650; }
+  #left h2:first-child { margin-top: 2px; }
+  .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .row label { flex: 0 0 auto; color: var(--muted); min-width: 74px; }
+  .row .val { margin-left: auto; font-variant-numeric: tabular-nums; min-width: 62px; text-align: right; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); height: 22px; }
+  select, button { font: inherit; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  select { flex: 1; min-width: 0; }
+  button:hover, select:hover { background: rgba(255,255,255,.12); }
+  button.primary { background: var(--accent); color: #1b1300; border-color: transparent; font-weight: 650; }
+  button.primary:hover { filter: brightness(1.08); }
+  button.on { background: rgba(255,176,32,.2); border-color: rgba(255,176,32,.6); }
+  .btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .btns button { flex: 1 1 auto; padding: 6px 8px; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+  .checks label { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 3px 0; user-select: none; }
+  .checks input, .tog input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+  .tog { display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 6px 0; user-select: none; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+  #hud { position: fixed; right: 12px; top: 12px; width: 300px; padding: 10px 12px; z-index: 4; font-variant-numeric: tabular-nums; }
+  #hud .big { font-size: 26px; font-weight: 650; line-height: 1.1; }
+  #hud .big small { font-size: 12px; font-weight: 400; color: var(--muted); }
+  #hud .kv { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: var(--muted); }
+  #hud .kv b { color: var(--text); font-weight: 600; }
+  #hud .strokes { margin-top: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  #hud .st { border-radius: 6px; padding: 3px 5px; font-size: 11px; line-height: 1.25; background: rgba(255,255,255,.06); border-left: 3px solid #888; cursor: pointer; }
+  #hud .st.sel { outline: 1px solid var(--accent); }
+  #hud .st b { display: block; font-size: 11px; }
+  #bottom { position: fixed; left: 316px; right: 12px; bottom: 12px; z-index: 4; display: flex; gap: 10px; align-items: stretch; pointer-events: none; }
+  #bottom .panel { pointer-events: auto; padding: 8px 10px; }
+  #tl { flex: 1.25; min-width: 0; } #pt { flex: 1; min-width: 0; }
+  #bottom canvas { width: 100%; height: 150px; display: block; }
+  #bottom .cap { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 11px; margin-bottom: 4px; gap: 8px; }
+  #bottom .cap select { flex: 0 0 auto; padding: 2px 6px; font-size: 11px; }
+  #tip { position: fixed; z-index: 9; pointer-events: none; display: none; max-width: 280px; padding: 8px 10px; background: rgba(8,12,18,.94); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+  #tip b { color: var(--accent); display: block; margin-bottom: 2px; font-size: 13px; }
+  #tip span { color: #c5d0db; }
+  #legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 6px 0 0; font-size: 11px; color: var(--muted); }
+  #legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  #hint { position: fixed; left: 50%; transform: translateX(-50%); top: 12px; color: var(--muted); font-size: 11.5px; padding: 5px 12px; z-index: 3; pointer-events: none; text-shadow: 0 1px 6px #000; white-space: nowrap; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); z-index: 20; transition: opacity .5s; }
+  #loading div { text-align: center; color: var(--muted); } #loading b { color: var(--text); font-size: 16px; display: block; margin-bottom: 6px; }
+  .info { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .info b { color: var(--text); font-weight: 600; }
+  details summary { cursor: pointer; color: var(--accent); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 650; margin: 14px 0 6px; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; } table.spec td { padding: 2px 0; border-bottom: 1px solid var(--line); vertical-align: top; } table.spec td:last-child { text-align: right; color: var(--text); font-weight: 560; } table.spec td:first-child { color: var(--muted); }
+  @media (max-width: 900px) {
+    #menuBtn { display: block; }
+    #left { transform: translateX(-110%); transition: transform .25s; width: min(320px, 88vw); z-index: 8; top: 76px; }
+    #left.open { transform: none; }
+    #hud { width: 168px; padding: 7px 9px; top: 8px; right: 8px; font-size: 11.5px; } #hud .big { font-size: 18px; } #hud .strokes, #hud .m-hide { display: none; } #hint, #title p { display: none; } #title { top: 8px; left: 10px; max-width: calc(100vw - 200px); }
+    #bottom { left: 8px; right: 8px; bottom: 8px; flex-direction: column; gap: 6px; } #bottom canvas { height: 92px; } #pt { display: none; }
+    #title h1 { font-size: 13px; line-height: 1.2; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0"></canvas>
+<div id="loading"><div><b>12.8 L kamyon motoru hazırlanıyor…</b>3D model oluşturuluyor</div></div>
+
+<div id="title"><h1>12.8 L Ağır Vasıta Dizel Motoru</h1><p>Sıralı 6 silindir · turbo · 3D çalışma animasyonu ve kesit görünümü</p></div>
+<div id="hint">Sürükle: döndür · Sağ tık/Shift: kaydır · Tekerlek: yakınlaş · Parçaların üstüne gel: bilgi</div>
+<button id="menuBtn" class="panel">☰ Kontroller</button>
+
+<aside id="left" class="panel">
+  <h2>Çalışma</h2>
+  <div class="btns"><button id="play" class="primary">⏸ Durdur</button><button id="stepB" title="Geri 10°">◀ 10°</button><button id="stepF" title="İleri 10°">10° ▶</button></div>
+  <div class="row"><label for="rpm">Motor devri</label><input id="rpm" type="range" min="600" max="2200" step="50" value="1200"><span class="val" id="rpmV"></span></div>
+  <div class="row"><label for="load">Yük</label><input id="load" type="range" min="10" max="100" step="5" value="100"><span class="val" id="loadV"></span></div>
+  <div class="row"><label for="slow">Zaman ölçeği</label>
+    <select id="slow"><option value="1">Gerçek zaman (1×)</option><option value="0.2">1/5</option><option value="0.1">1/10</option><option value="0.0333" selected>1/30</option><option value="0.0167">1/60</option><option value="0.0083">1/120</option></select></div>
+  <div class="row"><label for="ang">Krank açısı</label><input id="ang" type="range" min="0" max="720" step="1" value="0"><span class="val" id="angV"></span></div>
+
+  <h2>Kesit (içini aç)</h2>
+  <label class="tog"><input type="checkbox" id="clipOn" checked> Kesit düzlemini etkinleştir</label>
+  <div class="row"><label for="clipAxis">Kesit yönü</label><select id="clipAxis"><option value="z">Boyuna (silindir ortasından)</option><option value="x">Enine (silindir boyunca)</option><option value="y">Yatay (üstten)</option></select></div>
+  <div class="row"><label for="clipPos">Konum</label><input id="clipPos" type="range" min="-60" max="60" step="0.5" value="0"><span class="val" id="clipV"></span></div>
+  <label class="tog"><input type="checkbox" id="clipFlip"> Diğer yarıyı göster</label>
+
+  <h2>Patlatma (parçalara ayır)</h2>
+  <div class="row"><label for="expl">Açılım</label><input id="expl" type="range" min="0" max="1" step="0.01" value="0"><span class="val" id="explV"></span></div>
+  <label class="tog"><input type="checkbox" id="xray"> X-ray (gövdeleri şeffaflaştır)</label>
+
+  <h2>Parçalar</h2>
+  <div class="checks" id="parts"></div>
+
+  <h2>Kamera</h2>
+  <div class="btns" id="cams"></div>
+  <label class="tog"><input type="checkbox" id="spin"> Otomatik döndür</label>
+  <label class="tog"><input type="checkbox" id="sound"> Motor sesi (sentetik)</label>
+
+  <h2>Gaz renkleri</h2>
+  <div id="legend"><span><i style="background:#54a0ff"></i>Emme (hava)</span><span><i style="background:#ffc542"></i>Sıkıştırma</span><span><i style="background:#ff6a2a"></i>Yanma / iş</span><span><i style="background:#85807d"></i>Egzoz</span></div>
+
+  <details><summary>Teknik veriler</summary>
+    <table class="spec" id="spec"></table>
+    <p class="info">Model, 12.8 L sınıfı (ör. Volvo D13, Mercedes OM 471) ağır vasıta motorlarının kamuya açık ana ölçülerinden üretilmiş <b>temsili bir parametrik modeldir</b>; üretici CAD verisi değildir. Silindir basıncı, güç ve tork değerleri tek bölgeli yanma modelinden yaklaşık hesaplanır.</p>
+  </details>
+</aside>
+
+<aside id="hud" class="panel">
+  <div class="big"><span id="hAng">0</span>°<small> krank açısı</small></div>
+  <div class="kv m-hide"><span>Çevrim</span><b id="hCyc">0 / 720°</b></div>
+  <div class="kv"><span>Motor devri</span><b id="hRpm">—</b></div>
+  <div class="kv"><span>Tahmini güç</span><b id="hPow">—</b></div>
+  <div class="kv m-hide"><span>Tahmini tork</span><b id="hTq">—</b></div>
+  <div class="kv m-hide"><span>Tepe silindir basıncı</span><b id="hPk">—</b></div>
+  <div class="strokes" id="strokes"></div>
+</aside>
+
+<div id="bottom">
+  <div id="tl" class="panel"><div class="cap"><span>Strok diyagramı · ateşleme sırası <b style="color:#e7edf3">1-5-3-6-2-4</b></span><span>720° = 2 devir</span></div><canvas id="tlc"></canvas></div>
+  <div id="pt" class="panel"><div class="cap"><span>Silindir basıncı · supap kalkışı</span><select id="selCyl"></select></div><canvas id="ptc"></canvas></div>
+</div>
+<div id="tip"></div>
+
+<script src="js/three.min.js"></script>
+<script src="js/params.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
